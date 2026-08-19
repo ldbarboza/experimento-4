@@ -9,10 +9,7 @@ export async function GET() {
     const products = productStore.getAll();
     return NextResponse.json(products, { status: 200 });
   } catch {
-    return NextResponse.json(
-      { error: 'Erro interno do servidor.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 }
 
@@ -25,7 +22,7 @@ export async function POST(request: NextRequest) {
     if (!validation.valid) {
       return NextResponse.json(
         { error: 'Dados inválidos.', errors: validation.errors },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -42,9 +39,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(product, { status: 201 });
   } catch {
-    return NextResponse.json(
-      { error: 'Erro interno do servidor.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 }
