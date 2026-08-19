@@ -1,24 +1,26 @@
-import React from 'react';
+'use client';
+
+import { ButtonHTMLAttributes, ReactNode } from 'react';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
-  loading?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
+  isLoading?: boolean;
 }
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300',
+    'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 border-transparent',
   secondary:
-    'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-400 disabled:opacity-50',
+    'bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-500 border-gray-300',
   danger:
-    'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300',
+    'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 border-transparent',
   ghost:
-    'bg-transparent text-blue-600 hover:bg-blue-50 focus:ring-blue-400 disabled:opacity-50',
+    'bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-400 border-transparent',
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -30,27 +32,29 @@ const sizeClasses: Record<Size, string> = {
 export function Button({
   variant = 'primary',
   size = 'md',
-  loading = false,
-  disabled,
   children,
+  isLoading = false,
   className = '',
+  disabled,
   ...props
 }: ButtonProps) {
   return (
     <button
-      disabled={disabled || loading}
+      {...props}
+      disabled={disabled || isLoading}
       className={[
-        'inline-flex items-center justify-center gap-2 rounded-lg font-medium',
-        'transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
+        'inline-flex items-center justify-center gap-2 rounded-md border font-medium',
+        'focus:outline-none focus:ring-2 focus:ring-offset-2',
+        'transition-colors duration-150',
+        'disabled:opacity-50 disabled:cursor-not-allowed',
         variantClasses[variant],
         sizeClasses[size],
         className,
       ].join(' ')}
-      {...props}
     >
-      {loading && (
+      {isLoading && (
         <svg
-          className="h-4 w-4 animate-spin"
+          className="animate-spin h-4 w-4"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
