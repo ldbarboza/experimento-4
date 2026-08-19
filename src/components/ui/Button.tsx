@@ -6,19 +6,19 @@ type Size = 'sm' | 'md' | 'lg';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
-  isLoading?: boolean;
+  loading?: boolean;
   children: React.ReactNode;
 }
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 border-transparent',
+    'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300',
   secondary:
-    'bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-500 border-gray-300',
+    'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-400 disabled:opacity-50',
   danger:
-    'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 border-transparent',
+    'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300',
   ghost:
-    'bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-400 border-transparent',
+    'bg-transparent text-blue-600 hover:bg-blue-50 focus:ring-blue-400 disabled:opacity-50',
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -30,7 +30,7 @@ const sizeClasses: Record<Size, string> = {
 export function Button({
   variant = 'primary',
   size = 'md',
-  isLoading = false,
+  loading = false,
   disabled,
   children,
   className = '',
@@ -38,21 +38,19 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      disabled={disabled || isLoading}
+      disabled={disabled || loading}
       className={[
-        'inline-flex items-center justify-center gap-2 rounded-md border font-medium',
-        'focus:outline-none focus:ring-2 focus:ring-offset-2',
-        'transition-colors duration-150',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center gap-2 rounded-lg font-medium',
+        'transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
         variantClasses[variant],
         sizeClasses[size],
         className,
       ].join(' ')}
       {...props}
     >
-      {isLoading && (
+      {loading && (
         <svg
-          className="animate-spin h-4 w-4"
+          className="h-4 w-4 animate-spin"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
