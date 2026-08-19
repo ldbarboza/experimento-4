@@ -1,35 +1,42 @@
-import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ProductForm } from '@/components/ProductForm';
 
-export const metadata = {
-  title: 'Novo Produto | Produtos Bancários',
+export const metadata: Metadata = {
+  title: 'Novo Produto',
 };
 
 export default function NewProductPage() {
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-        >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Voltar para a lista
+    <div className="max-w-2xl mx-auto">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+        <Link href="/" className="hover:text-blue-600 transition-colors">
+          Produtos
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-gray-900">Novo Produto</h1>
-        <p className="mt-1 text-sm text-gray-500">Preencha os dados para cadastrar um novo produto bancário.</p>
-      </div>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+        <span className="text-gray-900 font-medium">Novo produto</span>
+      </nav>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      {/* Card */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-gray-900">
+            Cadastrar novo produto
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Preencha os campos abaixo para cadastrar um novo produto bancário.
+          </p>
+        </div>
+
         <ProductForm />
       </div>
     </div>

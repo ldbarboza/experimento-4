@@ -1,4 +1,4 @@
-import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { productStore } from '@/lib/store';
@@ -6,18 +6,16 @@ import { ProductForm } from '@/components/ProductForm';
 
 export const dynamic = 'force-dynamic';
 
-interface EditProductPageProps {
-  params: { id: string };
-}
+type Props = { params: { id: string } };
 
-export async function generateMetadata({ params }: EditProductPageProps) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = productStore.getById(params.id);
   return {
-    title: product ? `Editar: ${product.name} | Produtos Bancários` : 'Editar Produto',
+    title: product ? `Editar: ${product.name}` : 'Produto não encontrado',
   };
 }
 
-export default function EditProductPage({ params }: EditProductPageProps) {
+export default function EditProductPage({ params }: Props) {
   const product = productStore.getById(params.id);
 
   if (!product) {
@@ -25,31 +23,50 @@ export default function EditProductPage({ params }: EditProductPageProps) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="mb-6">
+    <div className="max-w-2xl mx-auto">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+        <Link href="/" className="hover:text-blue-600 transition-colors">
+          Produtos
+        </Link>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
         <Link
           href={`/products/${product.id}`}
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+          className="hover:text-blue-600 transition-colors"
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Voltar para detalhes
+          {product.name}
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-gray-900">Editar Produto</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Atualize os dados do produto{' '}
-          <span className="font-medium text-gray-700">{product.name}</span>.
-        </p>
-      </div>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+        <span className="text-gray-900 font-medium">Editar</span>
+      </nav>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      {/* Card */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-gray-900">
+            Editar produto
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Atualize os campos abaixo e salve as alterações.
+          </p>
+        </div>
+
         <ProductForm initialData={product} />
       </div>
     </div>
