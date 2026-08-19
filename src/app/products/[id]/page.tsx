@@ -17,72 +17,89 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     notFound();
   }
 
-  const fields = [
-    { label: 'Nome', value: product.name },
-    { label: 'Tipo', value: product.type },
-    {
-      label: 'Descrição',
-      value: product.description ?? <span className="text-gray-400 italic">Não informado</span>,
-    },
-    {
-      label: 'Taxa de Juros',
-      value:
-        product.interestRate !== undefined
-          ? `${product.interestRate.toFixed(2)}%`
-          : <span className="text-gray-400 italic">Não informado</span>,
-    },
-    { label: 'Status', value: product.status },
-    {
-      label: 'Criado em',
-      value: new Date(product.createdAt).toLocaleString('pt-BR'),
-    },
-    { label: 'ID', value: <span className="font-mono text-xs text-gray-500">{product.id}</span> },
-  ];
+  const formattedDate = new Date(product.createdAt).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   return (
-    <div className="max-w-2xl">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link href="/" className="hover:text-blue-600 transition-colors">
-          Produtos
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 font-medium truncate max-w-[200px]">
-          {product.name}
-        </span>
-      </nav>
-
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8">
-        <div className="flex items-start justify-between mb-6">
-          <h1 className="text-xl font-bold text-gray-900">{product.name}</h1>
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              product.status === 'Ativo'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-gray-100 text-gray-600'
-            }`}
+    <div className="mx-auto max-w-2xl">
+      <div className="mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+        >
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
           >
-            {product.status}
-          </span>
-        </div>
-
-        <dl className="divide-y divide-gray-100">
-          {fields.map(({ label, value }) => (
-            <div key={label} className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
-              <dt className="text-sm font-medium text-gray-500">{label}</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{value}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <div className="mt-8 flex items-center gap-3">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Voltar para a lista
+        </Link>
+        <div className="mt-2 flex items-start justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
           <Link href={`/products/${product.id}/edit`}>
-            <Button variant="primary">Editar Produto</Button>
-          </Link>
-          <Link href="/">
-            <Button variant="secondary">Voltar para a Lista</Button>
+            <Button variant="secondary" size="sm">
+              Editar
+            </Button>
           </Link>
         </div>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <dl className="divide-y divide-gray-100">
+          <div className="px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-medium text-gray-500">Nome</dt>
+            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{product.name}</dd>
+          </div>
+          <div className="px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-medium text-gray-500">Tipo</dt>
+            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{product.type}</dd>
+          </div>
+          <div className="px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-medium text-gray-500">Status</dt>
+            <dd className="mt-1 sm:col-span-2 sm:mt-0">
+              <span
+                className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  product.status === 'Ativo'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+              >
+                {product.status}
+              </span>
+            </dd>
+          </div>
+          <div className="px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-medium text-gray-500">Taxa de Juros</dt>
+            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+              {product.interestRate !== undefined ? `${product.interestRate}%` : '—'}
+            </dd>
+          </div>
+          <div className="px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-medium text-gray-500">Descrição</dt>
+            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+              {product.description || <span className="text-gray-400">—</span>}
+            </dd>
+          </div>
+          <div className="px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-medium text-gray-500">Cadastrado em</dt>
+            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{formattedDate}</dd>
+          </div>
+          <div className="px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-medium text-gray-500">ID</dt>
+            <dd className="mt-1 font-mono text-xs text-gray-400 sm:col-span-2 sm:mt-0">
+              {product.id}
+            </dd>
+          </div>
+        </dl>
       </div>
     </div>
   );

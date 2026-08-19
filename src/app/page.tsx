@@ -5,45 +5,42 @@ import { ProductList } from '@/components/ProductList';
 import { Notification } from '@/components/Notification';
 import { Button } from '@/components/ui/Button';
 
-// Revalidate on every request so the list reflects the latest in-memory state
+// Force dynamic rendering so the in-memory store is always read fresh
 export const dynamic = 'force-dynamic';
 
-export default async function HomePage() {
+export default function HomePage() {
   const products = productStore.getAll();
 
   return (
     <>
-      {/* Success notification — reads ?success= query param */}
       <Suspense fallback={null}>
         <Notification />
       </Suspense>
 
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Produtos Bancários</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="mt-1 text-sm text-gray-500">
             {products.length} produto{products.length !== 1 ? 's' : ''} cadastrado
-            {products.length !== 1 ? 's' : ''}
+            {products.length !== 1 ? 's' : ''}.
           </p>
         </div>
         <Link href="/products/new">
-          <Button variant="primary" size="md">
+          <Button>
             <svg
-              className="w-4 h-4"
+              className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={2.5}
+              strokeWidth={2}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Novo Produto
           </Button>
         </Link>
       </div>
 
-      {/* Product list */}
       <ProductList products={products} />
     </>
   );
