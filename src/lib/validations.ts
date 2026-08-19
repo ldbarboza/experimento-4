@@ -35,7 +35,7 @@ export function validateProduct(data: ProductInput): ValidationResult {
   // description — optional, max 500 chars
   if (data.description !== undefined && data.description !== null && data.description !== '') {
     if (typeof data.description !== 'string') {
-      errors.description = 'A descrição deve ser um texto.';
+      errors.description = 'Descrição inválida.';
     } else if (data.description.length > 500) {
       errors.description = 'A descrição deve ter no máximo 500 caracteres.';
     }
