@@ -1,4 +1,4 @@
-import { PRODUCT_TYPES, PRODUCT_STATUSES } from '@/types/product';
+import { PRODUCT_TYPES, PRODUCT_STATUSES, ProductType, ProductStatus } from '@/types/product';
 
 export interface ValidationResult {
   valid: boolean;
@@ -20,7 +20,7 @@ export function validateProduct(data: ProductInput): ValidationResult {
   if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
     errors.name = 'O nome é obrigatório.';
   } else if (data.name.trim().length < 3) {
-    errors.name = 'O nome deve ter pelo menos 3 caracteres.';
+    errors.name = 'O nome deve ter no mínimo 3 caracteres.';
   } else if (data.name.trim().length > 100) {
     errors.name = 'O nome deve ter no máximo 100 caracteres.';
   }
@@ -28,7 +28,7 @@ export function validateProduct(data: ProductInput): ValidationResult {
   // type — required, must be one of the allowed values
   if (!data.type || typeof data.type !== 'string') {
     errors.type = 'O tipo é obrigatório.';
-  } else if (!PRODUCT_TYPES.includes(data.type as never)) {
+  } else if (!PRODUCT_TYPES.includes(data.type as ProductType)) {
     errors.type = 'Tipo de produto inválido.';
   }
 
@@ -41,7 +41,7 @@ export function validateProduct(data: ProductInput): ValidationResult {
     }
   }
 
-  // interestRate — optional, 0.00–100.00
+  // interestRate — optional, 0–100
   if (data.interestRate !== undefined && data.interestRate !== null && data.interestRate !== '') {
     const rate = Number(data.interestRate);
     if (isNaN(rate)) {
@@ -54,7 +54,7 @@ export function validateProduct(data: ProductInput): ValidationResult {
   // status — required, must be one of the allowed values
   if (!data.status || typeof data.status !== 'string') {
     errors.status = 'O status é obrigatório.';
-  } else if (!PRODUCT_STATUSES.includes(data.status as never)) {
+  } else if (!PRODUCT_STATUSES.includes(data.status as ProductStatus)) {
     errors.status = 'Status inválido.';
   }
 
