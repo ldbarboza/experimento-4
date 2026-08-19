@@ -1,15 +1,18 @@
 import type { Config } from 'jest';
+import nextJest from 'next/jest.js';
+
+const createJestConfig = nextJest({
+  dir: './',
+});
 
 const config: Config = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
+  coverageProvider: 'v8',
+  testEnvironment: 'jsdom',
+  setupFilesAfterFramework: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
-  transform: {
-    '^.+\\.tsx?$': ['ts-jest', { tsconfig: { jsx: 'react' } }],
-  },
+  testPathPattern: ['<rootDir>/src/**/__tests__/**/*.{ts,tsx}'],
 };
 
-export default config;
+export default createJestConfig(config);
