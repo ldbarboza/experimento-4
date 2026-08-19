@@ -6,24 +6,39 @@ import { ProductType, ProductStatus } from '@/types/product';
 type RouteContext = { params: { id: string } };
 
 // GET /api/products/[id] — returns a single product
-export async function GET(_request: NextRequest, { params }: RouteContext) {
+export async function GET(
+  _request: NextRequest,
+  { params }: RouteContext,
+) {
   try {
     const product = productStore.getById(params.id);
     if (!product) {
-      return NextResponse.json({ error: 'Produto não encontrado.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Produto não encontrado.' },
+        { status: 404 },
+      );
     }
     return NextResponse.json(product, { status: 200 });
   } catch {
-    return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor.' },
+      { status: 500 },
+    );
   }
 }
 
 // PUT /api/products/[id] — updates a product
-export async function PUT(request: NextRequest, { params }: RouteContext) {
+export async function PUT(
+  request: NextRequest,
+  { params }: RouteContext,
+) {
   try {
     const existing = productStore.getById(params.id);
     if (!existing) {
-      return NextResponse.json({ error: 'Produto não encontrado.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Produto não encontrado.' },
+        { status: 404 },
+      );
     }
 
     const body = await request.json();
@@ -49,21 +64,36 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 
     return NextResponse.json(updated, { status: 200 });
   } catch {
-    return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor.' },
+      { status: 500 },
+    );
   }
 }
 
 // DELETE /api/products/[id] — removes a product
-export async function DELETE(_request: NextRequest, { params }: RouteContext) {
+export async function DELETE(
+  _request: NextRequest,
+  { params }: RouteContext,
+) {
   try {
     const existing = productStore.getById(params.id);
     if (!existing) {
-      return NextResponse.json({ error: 'Produto não encontrado.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Produto não encontrado.' },
+        { status: 404 },
+      );
     }
 
     productStore.remove(params.id);
-    return NextResponse.json({ message: 'Produto excluído com sucesso.' }, { status: 200 });
+    return NextResponse.json(
+      { message: 'Produto excluído com sucesso.' },
+      { status: 200 },
+    );
   } catch {
-    return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor.' },
+      { status: 500 },
+    );
   }
 }
