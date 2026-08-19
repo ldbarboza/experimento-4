@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, PRODUCT_TYPES, PRODUCT_STATUSES } from '@/types/product';
 import { validateProduct, ProductInput } from '@/lib/validations';
-import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { Button } from '@/components/ui/Button';
 
 interface ProductFormProps {
   initialData?: Product;
@@ -19,23 +19,28 @@ export function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter();
   const isEditing = Boolean(initialData);
 
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     name: initialData?.name ?? '',
     type: initialData?.type ?? '',
     description: initialData?.description ?? '',
-    interestRate: initialData?.interestRate !== undefined ? String(initialData.interestRate) : '',
+    interestRate:
+      initialData?.interestRate !== undefined
+        ? String(initialData.interestRate)
+        : '',
     status: initialData?.status ?? '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear field error on change
     if (errors[name]) {
       setErrors((prev) => {
@@ -46,17 +51,17 @@ export function ProductForm({ initialData }: ProductFormProps) {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setServerError(null);
+    setServerError('');
 
     // Client-side validation
     const input: ProductInput = {
-      name: form.name,
-      type: form.type,
-      description: form.description || undefined,
-      interestRate: form.interestRate !== '' ? form.interestRate : undefined,
-      status: form.status,
+      name: formData.name,
+      type: formData.type,
+      description: formData.description || undefined,
+      interestRate: formData.interestRate !== '' ? formData.interestRate : undefined,
+      status: formData.status,
     };
 
     const validation = validateProduct(input);
@@ -65,7 +70,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
       return;
     }
 
-    setLoading(true);
+    setIsSubmitting(true);
+
     try {
       const url = isEditing
         ? `/api/products/${initialData!.id}`
@@ -73,11 +79,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
       const method = isEditing ? 'PUT' : 'POST';
 
       const payload = {
-        name: form.name.trim(),
-        type: form.type,
-        description: form.description.trim() || undefined,
-        interestRate: form.interestRate !== '' ? Number(form.interestRate) : undefined,
-        status: form.status,
+        name: formData.name.trim(),
+        type: formData.type,
+        description: formData.description.trim() || undefined,
+        interestRate:
+          formData.interestRate !== '' ? Number(formData.interestRate) : undefined,
+        status: formData.status,
       };
 
       const res = await fetch(url, {
@@ -91,7 +98,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
         if (data.errors) {
           setErrors(data.errors);
         } else {
-          setServerError(data.error ?? 'Ocorreu um erro inesperado.');
+          setServerError(data.error ?? 'Ocorreu um erro. Tente novamente.');
         }
         return;
       }
@@ -99,25 +106,28 @@ export function ProductForm({ initialData }: ProductFormProps) {
       const successParam = isEditing ? 'updated' : 'created';
       router.push(`/?success=${successParam}`);
     } catch {
-      setServerError('Não foi possível conectar ao servidor. Tente novamente.');
+      setServerError('Erro de conexão. Verifique sua internet e tente novamente.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} noValidate className="space-y-6">
       {serverError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div
+          role="alert"
+          className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700"
+        >
           {serverError}
         </div>
       )}
 
       <Input
-        label="Nome do Produto"
-        id="name"
+        label="Nome do produto"
         name="name"
-        value={form.name}
+        id="name"
+        value={formData.name}
         onChange={handleChange}
         error={errors.name}
         required
@@ -127,31 +137,35 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
       <Select
         label="Tipo"
-        id="type"
         name="type"
-        value={form.type}
+        id="type"
+        value={formData.type}
         onChange={handleChange}
         error={errors.type}
         required
-        placeholder="Selecione um tipo"
         options={typeOptions}
+        placeholder="Selecione um tipo"
       />
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="description" className="text-sm font-medium text-gray-700">
+        <label
+          htmlFor="description"
+          className="text-sm font-medium text-gray-700"
+        >
           Descrição
         </label>
         <textarea
           id="description"
           name="description"
-          value={form.description}
+          value={formData.description}
           onChange={handleChange}
-          rows={3}
+          rows={4}
           maxLength={500}
-          placeholder="Descreva o produto bancário (opcional)"
+          placeholder="Descreva o produto bancário..."
           className={[
-            'rounded-lg border px-3 py-2 text-sm shadow-sm transition-colors resize-none',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+            'block w-full rounded-md border px-3 py-2 text-sm shadow-sm resize-none',
+            'placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+            'transition-colors duration-150',
             errors.description
               ? 'border-red-400 bg-red-50'
               : 'border-gray-300 bg-white',
@@ -159,52 +173,62 @@ export function ProductForm({ initialData }: ProductFormProps) {
         />
         <div className="flex justify-between">
           {errors.description ? (
-            <p className="text-xs text-red-600">{errors.description}</p>
+            <p className="text-xs text-red-600" role="alert">
+              {errors.description}
+            </p>
           ) : (
             <span />
           )}
-          <p className="text-xs text-gray-400">{form.description.length}/500</p>
+          <p className="text-xs text-gray-400">
+            {formData.description.length}/500
+          </p>
         </div>
       </div>
 
       <Input
-        label="Taxa de Juros (%)"
-        id="interestRate"
+        label="Taxa de juros (%)"
         name="interestRate"
+        id="interestRate"
         type="number"
-        value={form.interestRate}
+        value={formData.interestRate}
         onChange={handleChange}
         error={errors.interestRate}
         placeholder="Ex: 2.49"
         min={0}
         max={100}
         step={0.01}
-        hint="Opcional. Valor entre 0 e 100."
+        hint="Opcional. Informe um valor entre 0 e 100."
       />
 
       <Select
         label="Status"
-        id="status"
         name="status"
-        value={form.status}
+        id="status"
+        value={formData.status}
         onChange={handleChange}
         error={errors.status}
         required
-        placeholder="Selecione um status"
         options={statusOptions}
+        placeholder="Selecione um status"
       />
 
-      <div className="flex gap-3 pt-2">
-        <Button type="submit" loading={loading} disabled={loading}>
-          {isEditing ? 'Salvar Alterações' : 'Cadastrar Produto'}
-        </Button>
+      <div className="flex items-center justify-end gap-3 pt-2">
         <Button
           type="button"
           variant="secondary"
           onClick={() => router.push('/')}
-          disabled={loading}
+          disabled={isSubmitting}
         >
           Cancelar
+        </Button>
+        <Button type="submit" isLoading={isSubmitting}>
+          {isSubmitting
+            ? isEditing
+              ? 'Salvando...'
+              : 'Cadastrando...'
+            : isEditing
+              ? 'Salvar alterações'
+              : 'Cadastrar produto'}
         </Button>
       </div>
     </form>
