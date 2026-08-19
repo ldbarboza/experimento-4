@@ -7,53 +7,32 @@ import { validateProduct, ProductInput } from '@/lib/validations';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
 
 interface ProductFormProps {
   initialData?: Product;
 }
 
-interface FormState {
-  name: string;
-  type: string;
-  description: string;
-  interestRate: string;
-  status: string;
-}
-
-const emptyForm: FormState = {
-  name: '',
-  type: '',
-  description: '',
-  interestRate: '',
-  status: '',
-};
+const typeOptions = PRODUCT_TYPES.map((t) => ({ value: t, label: t }));
+const statusOptions = PRODUCT_STATUSES.map((s) => ({ value: s, label: s }));
 
 export function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter();
-  const isEditing = !!initialData;
+  const isEditing = Boolean(initialData);
 
-  const [form, setForm] = useState<FormState>(
-    initialData
-      ? {
-          name: initialData.name,
-          type: initialData.type,
-          description: initialData.description ?? '',
-          interestRate:
-            initialData.interestRate !== undefined
-              ? String(initialData.interestRate)
-              : '',
-          status: initialData.status,
-        }
-      : emptyForm
-  );
+  const [form, setForm] = useState({
+    name: initialData?.name ?? '',
+    type: initialData?.type ?? '',
+    description: initialData?.description ?? '',
+    interestRate: initialData?.interestRate !== undefined ? String(initialData.interestRate) : '',
+    status: initialData?.status ?? '',
+  });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -86,8 +65,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
       return;
     }
 
-    setIsSubmitting(true);
-
+    setLoading(true);
     try {
       const url = isEditing
         ? `/api/products/${initialData!.id}`
@@ -113,7 +91,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
         if (data.errors) {
           setErrors(data.errors);
         } else {
-          setServerError(data.error ?? 'Ocorreu um erro. Tente novamente.');
+          setServerError(data.error ?? 'Ocorreu um erro inesperado.');
         }
         return;
       }
@@ -121,22 +99,16 @@ export function ProductForm({ initialData }: ProductFormProps) {
       const successParam = isEditing ? 'updated' : 'created';
       router.push(`/?success=${successParam}`);
     } catch {
-      setServerError('Erro de conexão. Verifique sua internet e tente novamente.');
+      setServerError('Não foi possível conectar ao servidor. Tente novamente.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   }
 
-  const typeOptions = PRODUCT_TYPES.map((t) => ({ value: t, label: t }));
-  const statusOptions = PRODUCT_STATUSES.map((s) => ({ value: s, label: s }));
-
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
       {serverError && (
-        <div
-          role="alert"
-          className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700"
-        >
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {serverError}
         </div>
       )}
@@ -145,12 +117,11 @@ export function ProductForm({ initialData }: ProductFormProps) {
         label="Nome do Produto"
         id="name"
         name="name"
-        type="text"
         value={form.name}
         onChange={handleChange}
         error={errors.name}
-        placeholder="Ex: Conta Corrente Premium"
         required
+        placeholder="Ex: Conta Corrente Digital"
         maxLength={100}
       />
 
@@ -160,23 +131,41 @@ export function ProductForm({ initialData }: ProductFormProps) {
         name="type"
         value={form.type}
         onChange={handleChange}
-        options={typeOptions}
-        placeholder="Selecione um tipo"
         error={errors.type}
         required
+        placeholder="Selecione um tipo"
+        options={typeOptions}
       />
 
-      <Textarea
-        label="Descrição"
-        id="description"
-        name="description"
-        value={form.description}
-        onChange={handleChange}
-        error={errors.description}
-        placeholder="Descreva o produto bancário..."
-        maxLength={500}
-        hint="Opcional. Máximo de 500 caracteres."
-      />
+      <div className="flex flex-col gap-1">
+        <label htmlFor="description" className="text-sm font-medium text-gray-700">
+          Descrição
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          rows={3}
+          maxLength={500}
+          placeholder="Descreva o produto bancário (opcional)"
+          className={[
+            'rounded-lg border px-3 py-2 text-sm shadow-sm transition-colors resize-none',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+            errors.description
+              ? 'border-red-400 bg-red-50'
+              : 'border-gray-300 bg-white',
+          ].join(' ')}
+        />
+        <div className="flex justify-between">
+          {errors.description ? (
+            <p className="text-xs text-red-600">{errors.description}</p>
+          ) : (
+            <span />
+          )}
+          <p className="text-xs text-gray-400">{form.description.length}/500</p>
+        </div>
+      </div>
 
       <Input
         label="Taxa de Juros (%)"
@@ -186,7 +175,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
         value={form.interestRate}
         onChange={handleChange}
         error={errors.interestRate}
-        placeholder="Ex: 12.99"
+        placeholder="Ex: 2.49"
         min={0}
         max={100}
         step={0.01}
@@ -199,21 +188,21 @@ export function ProductForm({ initialData }: ProductFormProps) {
         name="status"
         value={form.status}
         onChange={handleChange}
-        options={statusOptions}
-        placeholder="Selecione um status"
         error={errors.status}
         required
+        placeholder="Selecione um status"
+        options={statusOptions}
       />
 
-      <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" variant="primary" isLoading={isSubmitting}>
+      <div className="flex gap-3 pt-2">
+        <Button type="submit" loading={loading} disabled={loading}>
           {isEditing ? 'Salvar Alterações' : 'Cadastrar Produto'}
         </Button>
         <Button
           type="button"
           variant="secondary"
           onClick={() => router.push('/')}
-          disabled={isSubmitting}
+          disabled={loading}
         >
           Cancelar
         </Button>
